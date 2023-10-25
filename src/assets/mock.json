@@ -1,0 +1,32 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "To praise shperling",
+      "description": "Tell your team leader that he is the best you ever had",
+      "estimatedTime": "3d",
+      "status": "Open",
+      "priority": "High",
+      "endTime": "2020-12-31T23:59:00.045Z"
+    },
+    {
+      "id": "2",
+      "title": "To finish this task",
+      "description": "To finish this task in node",
+      "estimatedTime": "1w",
+      "status": "In progress",
+      "priority": "Medium"
+    },
+    {
+      "id": "3",
+      "title": "Have a break",
+      "description": "Tell your team leader that he is the best you ever had",
+      "estimatedTime": "0.5h",
+      "status": "Close",
+      "priority": "Low",
+      "review": "The break was 30 minutes and 2 seconds, so you have to work another 2 seconds at the end of the day",
+      "timeSpent": "30m 2s",
+      "endTime": "2020-12-31T23:59:00.045Z"
+    }
+  ]
+}
