@@ -27,11 +27,10 @@ export const createTaskFromJson = (jsonData: any): Task => {
         estimatedTime: jsonData.estimatedTime,
         status: jsonData.status,
         priority: jsonData.priority,
-        review: jsonData.review ? jsonData.review : undefined,
-        timeSpent: jsonData.timeSpent ? jsonData.timeSpent : undefined,
-        endTime: jsonData.endTime ? jsonData.endTime : undefined,
+        review: jsonData.review ,
+        timeSpent: jsonData.timeSpent,
+        endTime: jsonData.endTime ,
     };
-
 
     return newTask;
 }
