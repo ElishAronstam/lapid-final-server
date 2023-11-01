@@ -1,21 +1,31 @@
-import dotenv from 'dotenv';
-dotenv.config();
-import { ApolloServer } from 'apollo-server';
 import typeDefs from './graphQl/schema/schema';
 import resolvers from './graphQl/resolvers/resolvers';
 import Task from './types/task';
 import { getInitTasks } from './helper';
+import { ApolloServer } from 'apollo-server-express';
+import express from 'express';
 
-const server = new ApolloServer({ typeDefs, resolvers});
 
 export let tasksObjects: Array<Task> = getInitTasks();
 
-server.listen().then(() => {
-  console.log(`
-    Server is running!
-    Listening on port 4000
-  `);
-});
+const startServer = async () => {
+  const app = express();
+
+  const server = new ApolloServer({ typeDefs, resolvers });
+
+  await server.start();
+
+  server.applyMiddleware({ app });
+
+  const PORT = process.env.PORT || 4000;
+
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}/graphql`);
+  });
+};
+
+startServer();
 
 // import express, { Application, Request, Response } from 'express';
 // import dotenv from 'dotenv';
