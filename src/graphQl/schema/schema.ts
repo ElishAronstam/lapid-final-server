@@ -2,7 +2,6 @@ import { gql } from 'apollo-server-express';
 
  const typeDefs = gql`
 input TaskInput {
-    id:String
     title:String!
     description:String!
     estimatedTime:String!
@@ -41,7 +40,7 @@ type Mutation {
     deleteTask(taskId:String):String
 }
 type Subscription {
-   tasksUpdated(currTasks:[Task], filters:TasksFiltersInput):TaskSubscriptionPayload 
+   tasksUpdated:TaskSubscriptionPayload 
 }
 
 type TaskSubscriptionPayload {

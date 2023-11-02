@@ -70,24 +70,26 @@ const resolvers = {
   },
   Subscription: {
     tasksUpdated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterator(['TASK_UPDATED']),
-        (payload, variables) => {
-          if (payload.tasksUpdated.actionType === 'delete') {
-            return variables.currTasks.includes(payload.tasksUpdated.item);
-          } else if (payload.tasksUpdated.actionType === 'add') {
-            const filterByOpenStatus = variables.filters.statusFilter === true;
-            const filterByHighPriority = variables.filters.priorityFilter === true;
-            const keyword = variables.filters.searchWord.toString();
+      subscribe:() => pubsub.asyncIterator(['TASKS_UPDATED'])
 
-            // TODO:make sure it works
-            const filtered = filterTasksHelper(tasksObjects, filterByOpenStatus, filterByHighPriority, keyword);
-
-            return filtered.includes(payload.tasksUpdated.item);
-          } else {
-            return false;
-          }
-        }),
+      // withFilter(
+      //   () => pubsub.asyncIterator(['TASKS_UPDATED']),
+      //   (payload, variables) => {
+      //     if (payload.tasksUpdated.actionType === 'delete') {
+      //       return variables.currTasks.includes(payload.tasksUpdated.item);
+      //     } else if (payload.tasksUpdated.actionType === 'add') {
+      //       const filterByOpenStatus = variables.filters.statusFilter === true;
+      //       const filterByHighPriority = variables.filters.priorityFilter === true;
+      //       const keyword = variables.filters.searchWord.toString();
+      //
+      //       // TODO:make sure it works
+      //       const filtered = filterTasksHelper(tasksObjects, filterByOpenStatus, filterByHighPriority, keyword);
+      //
+      //       return filtered.includes(payload.tasksUpdated.item);
+      //     } else {
+      //       return false;
+      //     }
+      //   }),
     },
   }
 };

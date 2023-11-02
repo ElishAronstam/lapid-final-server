@@ -12,20 +12,13 @@ import { getInitTasks } from './helper';
 
 export const tasksObjects: Array<Task> = getInitTasks();
 
-const startServer = async () => {
+(async function() {
   const app = express();
   const httpServer = http.createServer(app);
+
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-  const server = new ApolloServer({
-    schema,
-  });
-
-  await server.start();
-
-  server.applyMiddleware({ app });
-
-  SubscriptionServer.create(
+  const subscriptionServer = SubscriptionServer.create(
     {
       schema,
       execute,
@@ -33,9 +26,27 @@ const startServer = async () => {
     },
     {
       server: httpServer,
-      path: server.graphqlPath,
-    }
+      path: '/graphql',
+    },
   );
+  const server = new ApolloServer({
+    schema,
+    plugins: [
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close();
+            },
+          };
+        },
+      },
+    ],
+  });
+
+  await server.start();
+
+  server.applyMiddleware({ app });
 
   const PORT = process.env.PORT || 4000;
 
@@ -43,9 +54,7 @@ const startServer = async () => {
     console.log(`Server is running on http://localhost:${PORT}/graphql`);
     console.log(`Subscriptions are ready at ws://localhost:${PORT}${server.graphqlPath}`);
   });
-};
-
-startServer();
+})();
 
 // import express, { Application, Request, Response } from 'express';
 // import dotenv from 'dotenv';
