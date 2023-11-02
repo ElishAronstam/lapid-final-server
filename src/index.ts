@@ -1,27 +1,47 @@
+import { ApolloServer } from 'apollo-server-express';
+import express from 'express';
+import http from 'http';
+import { execute, subscribe } from 'graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+
 import typeDefs from './graphQl/schema/schema';
 import resolvers from './graphQl/resolvers/resolvers';
 import Task from './types/task';
 import { getInitTasks } from './helper';
-import { ApolloServer } from 'apollo-server-express';
-import express from 'express';
 
-
-export let tasksObjects: Array<Task> = getInitTasks();
+export const tasksObjects: Array<Task> = getInitTasks();
 
 const startServer = async () => {
   const app = express();
+  const httpServer = http.createServer(app);
+  const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-  const server = new ApolloServer({ typeDefs, resolvers });
+  const server = new ApolloServer({
+    schema,
+  });
 
   await server.start();
 
   server.applyMiddleware({ app });
 
+  SubscriptionServer.create(
+    {
+      schema,
+      execute,
+      subscribe,
+    },
+    {
+      server: httpServer,
+      path: server.graphqlPath,
+    }
+  );
+
   const PORT = process.env.PORT || 4000;
 
-
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}/graphql`);
+    console.log(`Subscriptions are ready at ws://localhost:${PORT}${server.graphqlPath}`);
   });
 };
 

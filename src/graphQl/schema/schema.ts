@@ -40,6 +40,14 @@ type Mutation {
     createTask(taskInput:TaskInput):Task
     deleteTask(taskId:String):String
 }
+type Subscription {
+   tasksUpdated(currTasks:[Task], filters:TasksFiltersInput):TaskSubscriptionPayload 
+}
+
+type TaskSubscriptionPayload {
+   item:Task
+   actionType: String
+}
 
 `;
 
