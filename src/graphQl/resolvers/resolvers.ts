@@ -1,4 +1,4 @@
-import Task from '../../types/task';
+import Task from '../../types/Task/task';
 import { v4 as uuidv4 } from 'uuid';
 import { PubSub, withFilter } from 'graphql-subscriptions';
 import { tasksObjects } from '../../index';
@@ -15,8 +15,7 @@ const resolvers = {
       const filterByHighPriority = filters.priorityFilter === true;
       const keyword = filters.searchWord.toString();
 
-      // TODO:make sure it works
-      return filterTasksHelper(tasksObjects,filterByOpenStatus,filterByHighPriority,keyword);
+      return filterTasksHelper(tasksObjects, filterByOpenStatus, filterByHighPriority, keyword);
     },
   },
 
@@ -36,7 +35,7 @@ const resolvers = {
       };
 
       tasksObjects.push(newTask);
-
+      console.log('Task added to db');
       pubsub.publish('TASKS_UPDATED', {
         tasksUpdated: {
           item: newTask,
@@ -53,9 +52,9 @@ const resolvers = {
       if (taskIndex === -1) {
         console.log('Task not found');
       } else {
-        const taskToDelete:Task = tasksObjects[taskIndex];
+        const taskToDelete: Task = tasksObjects[taskIndex];
         tasksObjects.splice(taskIndex, 1);
-
+        console.log('Task deleted from db');
         pubsub.publish('TASKS_UPDATED', {
           tasksUpdated: {
             item: taskToDelete,
@@ -68,30 +67,28 @@ const resolvers = {
 
     },
   },
+
   Subscription: {
     tasksUpdated: {
-      subscribe:() => pubsub.asyncIterator(['TASKS_UPDATED'])
+      subscribe: withFilter(
+        () => pubsub.asyncIterator(['TASKS_UPDATED']),
+        (payload, variables) => {
+          if (payload.tasksUpdated.actionType === 'delete') {
+            return true;
+          } else if (payload.tasksUpdated.actionType === 'add') {
+            const filterByOpenStatus = variables.filters.statusFilter === true;
+            const filterByHighPriority = variables.filters.priorityFilter === true;
+            const keyword = variables.filters.searchWord.toString();
 
-      // withFilter(
-      //   () => pubsub.asyncIterator(['TASKS_UPDATED']),
-      //   (payload, variables) => {
-      //     if (payload.tasksUpdated.actionType === 'delete') {
-      //       return variables.currTasks.includes(payload.tasksUpdated.item);
-      //     } else if (payload.tasksUpdated.actionType === 'add') {
-      //       const filterByOpenStatus = variables.filters.statusFilter === true;
-      //       const filterByHighPriority = variables.filters.priorityFilter === true;
-      //       const keyword = variables.filters.searchWord.toString();
-      //
-      //       // TODO:make sure it works
-      //       const filtered = filterTasksHelper(tasksObjects, filterByOpenStatus, filterByHighPriority, keyword);
-      //
-      //       return filtered.includes(payload.tasksUpdated.item);
-      //     } else {
-      //       return false;
-      //     }
-      //   }),
+            const filtered = filterTasksHelper(tasksObjects, filterByOpenStatus, filterByHighPriority, keyword);
+
+            return filtered.includes(payload.tasksUpdated.item);
+          } else {
+            return false;
+          }
+        }),
     },
-  }
+  },
 };
 
 export default resolvers;

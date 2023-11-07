@@ -5,9 +5,9 @@ import { execute, subscribe } from 'graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 
-import typeDefs from './graphQl/schema/schema';
+import typeDefs from './graphQl/typeDefs/typeDefs';
 import resolvers from './graphQl/resolvers/resolvers';
-import Task from './types/task';
+import Task from './types/Task/task';
 import { getInitTasks } from './helper';
 
 export const tasksObjects: Array<Task> = getInitTasks();
@@ -16,7 +16,8 @@ export const tasksObjects: Array<Task> = getInitTasks();
   const app = express();
   const httpServer = http.createServer(app);
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const schema = makeExecutableSchema(
+    { typeDefs, resolvers });
 
   const subscriptionServer = SubscriptionServer.create(
     {
@@ -31,17 +32,6 @@ export const tasksObjects: Array<Task> = getInitTasks();
   );
   const server = new ApolloServer({
     schema,
-    plugins: [
-      {
-        async serverWillStart() {
-          return {
-            async drainServer() {
-              subscriptionServer.close();
-            },
-          };
-        },
-      },
-    ],
   });
 
   await server.start();
